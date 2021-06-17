@@ -19,7 +19,7 @@ learners = unlist(lapply(LEARNER_IDS, function(lid) lapply(tasks, function(t) ge
 resamplings = lapply(tasks, function(t) RESAMPLING_OUTER$clone(deep = TRUE)$instantiate(t))
 
 design = data.table(
-  task = rep(tasks, each = length(LEARNER_IDS)),
+  task = rep(tasks, times = length(LEARNER_IDS)),
   learner = learners,
   resampling = rep(resamplings, each = length(LEARNER_IDS))
 )

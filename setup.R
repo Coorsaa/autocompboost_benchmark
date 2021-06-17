@@ -48,7 +48,12 @@ getGraphLearner = function(learner_id) {
 # autotuner/graphlearner/autocompboost
 getFinalLearner = function(learner_id, task) {
   if (learner_id == "classif.autocompboost") {
-    return(AutoCompBoost(task, tuning_time = TUNING_BUDGET, tuning_iters = 500)$learner)
+    return(AutoCompBoost(
+      task = task,
+      tuning_time = TUNING_BUDGET,
+      tuning_iters = 500,
+      measure = msr(ifelse(length(task$class_names) == 2, "classif.auc", "classif.logloss")
+    )$learner)
   } else {
     gl = getGraphLearner(learner_id)
     if (learner_id == "classif.ranger") {
