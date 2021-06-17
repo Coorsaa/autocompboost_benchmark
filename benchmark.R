@@ -21,7 +21,7 @@ resamplings = lapply(tasks, function(t) RESAMPLING_OUTER$clone(deep = TRUE)$inst
 design = data.table(
   task = rep(tasks, each = length(LEARNER_IDS)),
   learner = learners,
-  resampling = rep(resamplings, length(LEARNER_IDS))
+  resampling = rep(resamplings, each = length(LEARNER_IDS))
 )
 
 unlink("autocompboost-benchmark", recursive = TRUE)
