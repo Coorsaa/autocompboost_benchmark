@@ -14,12 +14,14 @@ source("setup.R", local = TRUE)
 
 tasks = lapply(OML_TASK_IDS, function(oid) tsk("oml", task_id = oid))
 
-learners = lapply(LEARNER_IDS, function(lid) lapply(tasks, function(t) getFinalLearner(lid, t)))
+learners = unlist(lapply(LEARNER_IDS, function(lid) lapply(tasks, function(t) getFinalLearner(lid, t))))
 
-design = benchmark_grid(
-  task = tasks,
+resamplings = lapply(tasks, function(t) RESAMPLING_OUTER$clone(deep = TRUE)$instantiate(t))
+
+design = data.table(
+  task = rep(tasks, each = length(LEARNER_IDS)),
   learner = learners,
-  resampling = RESAMPLING_OUTER
+  resampling = rep(resamplings, length(LEARNER_IDS))
 )
 
 unlink("autocompboost-benchmark", recursive = TRUE)
