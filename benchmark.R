@@ -26,10 +26,10 @@ design = data.table(
   resampling = rep(resamplings, times = length(LEARNER_IDS))
 )
 
-unlink("autocompboost-benchmark", recursive = TRUE)
+unlink("autocompboost-single-resampling-benchmark", recursive = TRUE)
 
 reg = batchtools::makeExperimentRegistry(
-  file.dir = "autocompboost-benchmark",
+  file.dir = "autocompboost-single-resampling-benchmark",
   packages = c("mlr3", "mlr3learners", "mlr3extralearners",
     "mlr3pipelines", "mlr3tuning", "mlrintermbo",
     "mlr3proba", "paradox", "dplyr"),
@@ -37,12 +37,12 @@ reg = batchtools::makeExperimentRegistry(
   seed = 123
 )
 reg$default.resources = list(
-  walltime = 3600L * 6L,
+  walltime = 3600L * 0.5L,
   memory = 1024L * 16L,
   ntasks = 1L,
-  ncpus = 8L,
+  ncpus = 1L,
   nodes = 1L,
-  clusters = "cm2_tiny"
+  clusters = "serial"
 )
 
 batchmark(design, reg = reg)#, store_models = TRUE)

@@ -70,7 +70,7 @@ getFinalLearner = function(learner_id, task) {
       tuning_time = TUNING_BUDGET,
       tuning_iters = 500,
       measure = m
-    )$learner)
+    )$learner$learner)
   } else if (learner_id == "classif.autocompboost.with_trees") {
     at = AutoCompBoost(
       task = task,
@@ -78,7 +78,7 @@ getFinalLearner = function(learner_id, task) {
       tuning_time = TUNING_BUDGET,
       tuning_iters = 500,
       measure = m
-    )$learner
+    )$learner$learner
     at$id = learner_id
     return(at)
   } else {
