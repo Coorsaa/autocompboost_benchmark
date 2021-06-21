@@ -9,19 +9,21 @@ library(paradox)
 library(batchtools)
 library(mlr3batchmark)
 library(data.table)
+library(autocompboost)
 
 source("setup.R", local = TRUE)
 
-tasks = lapply(OML_TASK_IDS, function(oid) tsk("oml", task_id = oid))
+OMLTasks = lapply(OML_TASK_IDS, function(oid) OMLTask$new(oid))
+tasks = lapply(OMLTasks, function(t) t$task)
+resamplings = lapply(OMLTasks, function(t) t$resampling)
 
 learners = unlist(lapply(LEARNER_IDS, function(lid) lapply(tasks, function(t) getFinalLearner(lid, t))))
 
-resamplings = lapply(tasks, function(t) RESAMPLING_OUTER$clone(deep = TRUE)$instantiate(t))
 
 design = data.table(
   task = rep(tasks, times = length(LEARNER_IDS)),
   learner = learners,
-  resampling = rep(resamplings, each = length(LEARNER_IDS))
+  resampling = rep(resamplings, times = length(LEARNER_IDS))
 )
 
 unlink("autocompboost-benchmark", recursive = TRUE)
@@ -35,12 +37,12 @@ reg = batchtools::makeExperimentRegistry(
   seed = 123
 )
 reg$default.resources = list(
-  walltime = 3600L * 12L,
-  memory = 1024L * 12L,
+  walltime = 3600L * 6L,
+  memory = 1024L * 16L,
   ntasks = 1L,
-  ncpus = 1L,
+  ncpus = 8L,
   nodes = 1L,
-  clusters = "serial"
+  clusters = "cm2_tiny"
 )
 
 batchmark(design, reg = reg)#, store_models = TRUE)

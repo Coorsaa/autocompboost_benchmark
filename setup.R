@@ -1,3 +1,6 @@
+# debug
+options("mlr3.debug" = TRUE)
+
 # Datasets
 oml_tasks = mlr3oml::list_oml_tasks(tag = "study_218")
 OML_TASK_IDS = oml_tasks$task_id
@@ -10,18 +13,19 @@ SCORE_MEASURES = c(
 
 # Learners
 LEARNER_IDS = c(
-  "classif.cv_glmnet",
-  "classif.ranger",
-  "classif.gamboost", # multiclasswrapper für gamboost
-  "classif.autocompboost"
+  # "classif.cv_glmnet",
+  # "classif.ranger",
+  # "classif.gamboost", # multiclass pipeline für gamboost
+  "classif.autocompboost",
+  "classif.autocompboost.with_trees"
 )
 
 # Resampling
-RESAMPLING_OUTER = rsmp("cv", folds = 10L)#rsmp("cv", folds = 10L)
+# RESAMPLING_OUTER = rsmp("cv", folds = 10L)#rsmp("cv", folds = 10L)
 
 
 # Tuning
-TUNING_BUDGET = 60L
+TUNING_BUDGET = 3600L * 3
 RESAMPLING_INNER = rsmp("cv", folds = 5L)
 TUNER = tnr("intermbo") #tnr("hyperband", eta = 2L)
 TERMINATOR = trm("run_time", secs = TUNING_BUDGET) #trm("none")
@@ -34,28 +38,51 @@ TERMINATOR = trm("run_time", secs = TUNING_BUDGET) #trm("none")
 
 # helper functions
 # graphlearner
-getGraphLearner = function(learner_id) {
-  as_learner(
-    po("removeconstants") %>>%
-      # po("extremwerte_raus") 3*sd %>>%
-      po("imputesample") %>>%
-      po("fixfactors") %>>%
-      po("encode") %>>% #learner abhängig
+getGraphLearner = function(learner_id, task) {
+  pipeline = po("removeconstants") %>>%
+    # po("extremwerte_raus") 3*sd %>>%
+    po("imputesample") %>>%
+    po("fixfactors") %>>%
+    po("encode")
+
+  if (learner_id == "classif.gamboost" && length(task$class_names) > 2) {
+    as_learner(
+      pipeline %>>%
+        pipeline_ovr(lrn(learner_id, predict_type = "prob"))
+    )
+  } else {
+    as_learner(pipeline %>>%
       lrn(learner_id, predict_type = "prob")
-  )
+    )
+  }
 }
 
 # autotuner/graphlearner/autocompboost
 getFinalLearner = function(learner_id, task) {
+  if ("multiclass" %in% task$properties) {
+    m = msr("classif.auc")
+  } else {
+    m = msr("classif.logloss")
+  }
   if (learner_id == "classif.autocompboost") {
     return(AutoCompBoost(
       task = task,
       tuning_time = TUNING_BUDGET,
       tuning_iters = 500,
-      measure = msr(ifelse(length(task$class_names) == 2, "classif.auc", "classif.logloss")
+      measure = m
     )$learner)
+  } else if (learner_id == "classif.autocompboost.with_trees") {
+    at = AutoCompBoost(
+      task = task,
+      param_values = list(add_deeper_interactions = TRUE),
+      tuning_time = TUNING_BUDGET,
+      tuning_iters = 500,
+      measure = m
+    )$learner
+    at$id = learner_id
+    return(at)
   } else {
-    gl = getGraphLearner(learner_id)
+    gl = getGraphLearner(learner_id, task)
     if (learner_id == "classif.ranger") {
       return(gl)
     } else {
