@@ -25,6 +25,7 @@ LEARNER_IDS = c(
 
 
 # Tuning
+TUNING = FALSE
 TUNING_BUDGET = 3600L * 3
 RESAMPLING_INNER = rsmp("cv", folds = 5L)
 TUNER = tnr("intermbo") #tnr("hyperband", eta = 2L)
@@ -68,17 +69,17 @@ getFinalLearner = function(learner_id, task) {
     return(AutoCompBoost(
       task = task,
       tuning_time = TUNING_BUDGET,
-      tuning_iters = 500,
-      measure = m
-    )$learner$learner)
+      measure = m,
+      enable_tuning = TUNING
+    )$learner)
   } else if (learner_id == "classif.autocompboost.with_trees") {
     at = AutoCompBoost(
       task = task,
       param_values = list(add_deeper_interactions = TRUE),
       tuning_time = TUNING_BUDGET,
-      tuning_iters = 500,
+      enable_tuning = TUNING,
       measure = m
-    )$learner$learner
+    )$learner
     at$id = learner_id
     return(at)
   } else {
