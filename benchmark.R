@@ -41,7 +41,8 @@ reg$default.resources = list(
   ntasks = 1L,
   ncpus = 8L,
   nodes = 1L,
-  clusters = "mpp3"
+  clusters = "cm2",
+  partition = "cm2_tiny"
 )
 
 batchmark(design, reg = reg)#, store_models = TRUE)
