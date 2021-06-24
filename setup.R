@@ -21,7 +21,7 @@ SCORE_MEASURES = c(
 LEARNER_IDS = c(
   "classif.cv_glmnet",
   # "classif.ranger",
-  "classif.gamboost", # multiclass pipeline für gamboost
+  # "classif.gamboost", # multiclass pipeline für gamboost
   "classif.autocompboost",
   "classif.autocompboost.with_trees"
 )
@@ -136,7 +136,7 @@ getFinalLearner = function(learner_id, task) {
       tuning_method = "hyperband",
       measure = m,
     )$learner
-    at$id = learner_id
+    at$id = paste(learner_id, task$id, sep = "_")
     return(at)
   } else if (learner_id == "classif.autocompboost.with_trees") {
     at = AutoCompBoost(
@@ -145,12 +145,12 @@ getFinalLearner = function(learner_id, task) {
       tuning_method = "hyperband",
       measure = m
     )$learner
-    at$id = learner_id
+    at$id = paste(learner_id, task$id, sep = "_")
     return(at)
   } else {
     gl = getGraphLearner(learner_id, task)
     if (learner_id == "classif.ranger") {
-      gl$id = learner_id
+      gl$id = paste(learner_id, task$id, sep = "_")
       return(gl)
     } else {
       at =  AutoTuner$new(
@@ -161,7 +161,7 @@ getFinalLearner = function(learner_id, task) {
           terminator = TERMINATOR,
           measure = m
         )
-      at$id = learner_id
+      at$id = paste(learner_id, task$id, sep = "_")
       return(at)
     }
   }
@@ -175,7 +175,7 @@ getTuningParams = function(learner_id, task) {
     )
   } else if (learner_id == "classif.gamboost") {
     search_space = ps(
-      classif.gamboost.dfbase = p_int(lower = 1, upper = min(15, sapply(task$levels(), length))),
+      classif.gamboost.dfbase = p_int(lower = 2, upper = min(15, max(sapply(task$levels(), length), 2))),
       classif.gamboost.nu = p_dbl(lower = 0.001, upper = 0.4),
       classif.gamboost.mstop = p_int(lower = 100, upper = 10000)
     )
