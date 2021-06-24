@@ -126,9 +126,9 @@ getGraphLearner = function(learner_id, task) {
 # autotuner/graphlearner/autocompboost
 getFinalLearner = function(learner_id, task) {
   if ("multiclass" %in% task$properties) {
-    m = msr("classif.auc")
-  } else {
     m = msr("classif.logloss")
+  } else {
+    m = msr("classif.auc")
   }
   if (learner_id == "classif.autocompboost") {
     at = AutoCompBoost(
@@ -159,7 +159,7 @@ getFinalLearner = function(learner_id, task) {
           resampling = RESAMPLING_INNER,
           tuner = TUNER,
           terminator = TERMINATOR,
-          measure = msr(ifelse(length(task$class_names) == 2, "classif.auc", "classif.logloss"))
+          measure = m
         )
       at$id = learner_id
       return(at)
