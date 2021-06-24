@@ -39,7 +39,7 @@ reg$default.resources = list(
   walltime = 3600L * 2,
   memory = 1024L * 16L,
   ntasks = 1L,
-  ncpus = 1L,
+  ncpus = 8L,
   nodes = 1L,
   clusters = "mpp3"
 )
