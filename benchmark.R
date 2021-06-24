@@ -4,6 +4,7 @@ library(mlr3learners)
 library(mlr3extralearners)
 library(mlr3pipelines)
 library(mlr3tuning)
+library(mlr3hyperband)
 library(mlr3misc)
 library(paradox)
 library(batchtools)
@@ -29,13 +30,13 @@ unlink("autocompboost-benchmark", recursive = TRUE)
 reg = batchtools::makeExperimentRegistry(
   file.dir = "autocompboost-benchmark",
   packages = c("mlr3", "mlr3learners", "mlr3extralearners",
-    "mlr3pipelines", "mlr3tuning", "mlrintermbo",
+    "mlr3pipelines", "mlr3tuning", "mlr3hyperband",
     "mlr3proba", "paradox", "dplyr", "autocompboost"),
   source = c("setup.R"),
   seed = 123
 )
 reg$default.resources = list(
-  walltime = 3600L * 5,
+  walltime = 3600L * 2,
   memory = 1024L * 16L,
   ntasks = 1L,
   ncpus = 1L,
