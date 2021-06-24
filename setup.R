@@ -2,8 +2,14 @@
 options("mlr3.debug" = TRUE)
 
 # Datasets
-oml_tasks = mlr3oml::list_oml_tasks(tag = "study_218")
-OML_TASK_IDS = oml_tasks$task_id
+# oml_tasks = mlr3oml::list_oml_tasks(tag = "study_218")
+# OML_TASK_IDS = oml_tasks$task_id
+OML_TASK_IDS = c(
+3, 12, 31, 53, 3917, 3945, 7592, 7593, 9952, 9977,
+10101, 14965, 146195, 146212, 146606, 146818, 146821, 146822, 146825, 167119,
+167120, 168329, 168330, 168331, 168335, 168337, 168338, 168908, 168909, 168911,
+168912, 189354, 189356
+)
 
 # Measures
 TUNING_MEASURE = "classif.acc"
