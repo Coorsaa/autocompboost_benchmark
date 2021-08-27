@@ -12,7 +12,7 @@ library(mlr3batchmark)
 library(data.table)
 library(autocompboost)
 
-source("setup.R", local = TRUE)
+source("setup_fixed.R", local = TRUE)
 
 tasks = lapply(OML_TASK_IDS, function(oid) tsk("oml", oid))
 resamplings = lapply(OML_TASK_IDS, function(oid) rsmp("oml", oid))
@@ -25,14 +25,14 @@ design = data.table(
   resampling = rep(resamplings, times = length(LEARNER_IDS))
 )
 
-unlink("autocompboost-benchmark", recursive = TRUE)
+unlink("autocompboost-benchmark-fixed", recursive = TRUE)
 
 reg = batchtools::makeExperimentRegistry(
-  file.dir = "autocompboost-benchmark",
+  file.dir = "autocompboost-benchmark-fixed",
   packages = c("mlr3", "mlr3learners", "mlr3extralearners",
     "mlr3pipelines", "mlr3tuning", "mlr3hyperband",
     "mlr3proba", "paradox", "dplyr", "autocompboost"),
-  source = c("setup.R"),
+  source = c("setup_fixed.R"),
   seed = 123
 )
 reg$default.resources = list(
@@ -48,3 +48,4 @@ reg$default.resources = list(
 batchmark(design, reg = reg)#, store_models = TRUE)
 
 getStatus()
+

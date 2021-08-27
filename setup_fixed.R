@@ -5,11 +5,24 @@ options("mlr3.debug" = TRUE)
 # oml_tasks = mlr3oml::list_oml_tasks(tag = "study_218")
 # OML_TASK_IDS = oml_tasks$task_id
 OML_TASK_IDS = c(
-3, 12, 31, 53, 3917, 3945, 7592, 7593, 9952, 9977,
-10101, 14965, 146195, 146212, 146606, 146818, 146821, 146822, 146825, 167119,
-167120, 168329, 168330, 168331, 168335, 168337, 168338, 168908, 168909, 168911,
-168912, 189354, 189356
+31 # missings
+# c++ ,3917
+, 146212 # missings
+, 146606 # missings
+, 146818 # missings
+, 146821 # missings
+, 146822 # missings
+# c++ , 146825
+# bad alloc , 168329
+, 168335 # missings
+# c++ , 168337
+# c++ , 168338
+# c++ , 168908
+# internal error , 168909
+, 189354 # missings
+# c++ , 3945
 )
+
 
 # Measures
 TUNING_MEASURE = "classif.acc"
@@ -19,7 +32,6 @@ SCORE_MEASURES = c(
 
 # Learners
 LEARNER_IDS = c(
-  "classif.cv_glmnet",
   # "classif.ranger",
   # "classif.gamboost", # multiclass pipeline für gamboost
   "classif.autocompboost",
@@ -68,7 +80,7 @@ autocompboost_preproc_pipeline = function(task, max_cardinality = 100) {
     pos = c(pos, po("datefeatures", param_vals = list(affect_columns = selector_type("POSIXct"))))
   }
 
-  if (sum(task$missings()) > 0 && has_type_feats(c("numeric", "integer"))) {
+  if (has_type_feats(c("numeric", "integer"))) {
     pos = c(pos,
       gunion(list(
         po("imputehist"),
@@ -77,7 +89,7 @@ autocompboost_preproc_pipeline = function(task, max_cardinality = 100) {
   }
 
   # Impute factors
-  if (sum(task$missings()) > 0 && has_type_feats(c("factor", "ordered", "character"))) {
+  if (has_type_feats(c("factor", "ordered", "character"))) {
     pos = c(pos, po("imputemode"))
   }
 
