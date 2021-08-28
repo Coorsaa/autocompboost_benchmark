@@ -5,21 +5,36 @@ options("mlr3.debug" = TRUE)
 # oml_tasks = mlr3oml::list_oml_tasks(tag = "study_218")
 # OML_TASK_IDS = oml_tasks$task_id
 OML_TASK_IDS = c(
-31 # missings
+  168337,
+  168338,
+  168908,
+  146825,
+  168909,
+  168335
+
+# # deep
+#  168911,
+#  146212,
+#  146822,
+#  168329,
+#  168331
+
+# 31 # missings
 # c++ ,3917
-, 146212 # missings
-, 146606 # missings
-, 146818 # missings
-, 146821 # missings
-, 146822 # missings
+#, 146212 # missings
+#, 146606 # missings
+#, 146818 # missings
+#, 146821 # missings
+#,
+# 146822 # missings
 # c++ , 146825
 # bad alloc , 168329
-, 168335 # missings
+# , 168335 # missings
 # c++ , 168337
 # c++ , 168338
 # c++ , 168908
 # internal error , 168909
-, 189354 # missings
+# , 189354 # missings
 # c++ , 3945
 )
 
@@ -64,6 +79,23 @@ autocompboost_preproc_pipeline = function(task, max_cardinality = 100) {
   pos = list()
   pos = c(pos, po("removeconstants"))
 
+  # recode hidden missings
+  pos = c(pos, po("colapply", id = "recode_hidden_missings", param_vals = list(affect_columns = selector_type(c("numeric", "integer")),
+    applicator = function(x) {
+      x[x == -999] = NA
+      return(x)
+    }
+  )))
+
+  # remove outliers
+  # pos = c(pos, po("colapply", id = "remove_outliers", param_vals = list(affect_columns = selector_type(c("numeric", "integer")),
+  #   applicator = function(x) {
+  #     x[abs(x) > 3 * sd(x)] = NA
+  #     return(x)
+  #   }
+  # )))
+
+
   if (has_type_feats("character")) {
     pos = c(pos, po("colapply", id = "char_to_fct", param_vals = list(affect_columns = selector_type("character"), applicator = function(x) as.factor(x))))
   }
@@ -83,14 +115,14 @@ autocompboost_preproc_pipeline = function(task, max_cardinality = 100) {
   if (has_type_feats(c("numeric", "integer"))) {
     pos = c(pos,
       gunion(list(
-        po("imputehist"),
+        po("imputehist", affect_columns = selector_type(c("numeric", "integer"))),
         po("missind", param_vals = list(affect_columns = selector_type(c("numeric", "integer")), type = "factor")))) %>>%
       po("featureunion"))
   }
 
   # Impute factors
   if (has_type_feats(c("factor", "ordered", "character"))) {
-    pos = c(pos, po("imputemode"))
+    pos = c(pos, po("imputesample", affect_columns = selector_type(c("factor", "ordered", "character"))))
   }
 
   # Fix extra factor levels
@@ -100,7 +132,7 @@ autocompboost_preproc_pipeline = function(task, max_cardinality = 100) {
 
   # Ensure all factor levels are encoded during predict FIXME: should we sample those or drop features with NA ratio above x%?
   if (has_type_feats(c("factor", "ordered", "character"))) {
-    pos = c(pos, po("imputesample", affect_columns = selector_type(c("factor", "ordered", "character"))))
+    pos = c(pos, po("imputesample", id = "imputesample_after_fixfactors", affect_columns = selector_type(c("factor", "ordered", "character"))))
   }
 
   # Collapse factors over 1000 levels
@@ -116,6 +148,8 @@ autocompboost_preproc_pipeline = function(task, max_cardinality = 100) {
 
   as_graph(Reduce(`%>>%`, pos))
 }
+
+
 
 # helper functions
 # graphlearner

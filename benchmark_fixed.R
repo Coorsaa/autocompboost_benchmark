@@ -25,10 +25,10 @@ design = data.table(
   resampling = rep(resamplings, times = length(LEARNER_IDS))
 )
 
-unlink("autocompboost-benchmark-fixed", recursive = TRUE)
+unlink("autocompboost-benchmark-fixed-2", recursive = TRUE)
 
 reg = batchtools::makeExperimentRegistry(
-  file.dir = "autocompboost-benchmark-fixed",
+  file.dir = "autocompboost-benchmark-fixed-2",
   packages = c("mlr3", "mlr3learners", "mlr3extralearners",
     "mlr3pipelines", "mlr3tuning", "mlr3hyperband",
     "mlr3proba", "paradox", "dplyr", "autocompboost"),
